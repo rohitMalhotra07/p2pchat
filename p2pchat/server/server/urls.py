@@ -10,7 +10,6 @@ urlpatterns = patterns('',
 
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'supernode.views.user_registration'),
-    url(r'^checkvalidemail$', 'supernode.views.ajax'),
-    url(r'^checkvalidemail','supernode.views.checkValidEmail'),
-    url(r'^logincheck','supernode.views.logincheck')
+    url(r'^checkvalidemail','supernode.views.checkvalidemail'),
+    url(r'^logincheck','supernode.views.logincheck'),
 )

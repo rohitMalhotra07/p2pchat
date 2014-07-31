@@ -58,8 +58,10 @@ def home(request):
     { 'user': request.user }
     )
 
-def checkValidEmail(request):
+def checkvalidemail(request):
     url='http://localhost:8010/checkvalidemail'
-    dataq=dataq={'emailid': request.POST['name']}
-    r=requests.get(url,data=dataq)
-    return HttpResponse("122")
+    dataq={'emailid': request.POST.get('Email')}
+    print dataq
+    r=requests.get(url,data=json.dumps(dataq))
+
+    return HttpResponse(r)

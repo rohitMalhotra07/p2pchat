@@ -40,7 +40,8 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def checkValidEmail(request):
+def checkvalidemail(request):
+	print "request to check valid email recieved"
 	data=json.loads(request.body)
 	if data.has_key('emailid'):
 		emailid=data['emailid']
