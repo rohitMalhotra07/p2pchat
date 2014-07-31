@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}User Registration{% endblock %}
+{% block head %}User Registration{% endblock %}
+{% block content %}
+    <form id="myForm" method="post" action=".">{% csrf_token %}
+        <table border="0">
+            {{ form.as_table }}
+        </table>
+        <input id="submit_button" type="submit" value="Register"/>
+     <div id="check" style="float:left; width:100%; height:50px; background:#787878;"></div>
+    <a href="/">Login</a>
+    </form>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+
+    <script type="text/javascript">
+    function checkValidEmail() 
+        {
+            var email = document.getElementById("id_email").value;
+            //alert(email);
+            document.getElementById("check").innerHTML = email;
+            $.ajax({
+                    type: "POST",
+                    url:"http://localhost:8000/checkvalidemail",  // or just url: "/my-url/path/"
+                    data:{
+                            csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                            Email: email,
+                         },
+                    success: function(data) {
+                                                alert("Congratulations! You scored: "+data);
+                                            },
+                    error: function(xhr, textStatus, errorThrown){
+                                                                    alert("Please report this error: "+errorThrown+xhr.status+xhr.responseText);
+                                                                }
+                    });
+        }
+    </script>
+{% endblock %}
