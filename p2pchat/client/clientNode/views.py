@@ -11,13 +11,15 @@ from django.template import RequestContext
 from uuid import getnode as get_mac
 import json
 import requests
- 
+
+ServerAddress="http://172.16.64.71:8010"
 
 def login(request):
+    global ServerAddress
     if request.method=='POST':
         print 'we are here'
         form = LoginForm(request.POST) # A form bound to the POST data
-        url='http://127.0.0.1:8010/logincheck'
+        url=ServerAddress+'/logincheck'
         mac_address=get_mac()
         dataq={
             'email':request.POST['email'],
@@ -37,9 +39,10 @@ def login(request):
 
 @csrf_exempt
 def register(request):
+    global ServerAddress
     if request.method == 'POST':
         form = RegistrationForm(request.POST) # A form bound to the POST data
-        url='http://127.0.0.1:8010'
+        url=ServerAddress
         mac_address = get_mac()
         print 'reached here'
         dataq={
@@ -83,7 +86,8 @@ def home(request):
     )
 
 def checkvalidemail(request):
-    url='http://localhost:8010/checkvalidemail'
+    global ServerAddress
+    url=ServerAddress+'/checkvalidemail'
     dataq={'emailid': request.POST.get('Email')}
     print dataq
     r=requests.get(url,data=json.dumps(dataq))
