@@ -4,11 +4,6 @@ from supernode.views import *
 #admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'supernode.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-
-    #url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'supernode.views.user_registration'),
     url(r'^checkvalidemail','supernode.views.checkvalidemail'),
     url(r'^logincheck','supernode.views.logincheck'),

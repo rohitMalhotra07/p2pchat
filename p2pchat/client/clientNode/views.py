@@ -1,6 +1,7 @@
 #views.py
 from clientNode import *
 from files import RegistrationForm 
+from files import LoginForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.views.decorators.csrf import csrf_protect,csrf_exempt
@@ -11,6 +12,29 @@ from uuid import getnode as get_mac
 import json
 import requests
  
+
+def login(request):
+    if request.method=='POST':
+        print 'we are here'
+        form = LoginForm(request.POST) # A form bound to the POST data
+        url='http://127.0.0.1:8010/logincheck'
+        mac_address=get_mac()
+        dataq={
+            'email':request.POST['email'],
+            'password':request.POST['password'],
+            'mac_address':mac_address,
+        }
+        print dataq
+        r = requests.get(url,data=json.dumps(dataq) )
+        return HttpResponse(r)
+    else:
+        form =LoginForm()
+        variables=RequestContext(request,
+            {
+                'form':form
+            })
+        return render_to_response('registration/login.html',variables,)
+
 @csrf_exempt
 def register(request):
     if request.method == 'POST':

@@ -62,10 +62,19 @@ def logincheck(request):
 			temp=User.objects.get(email=tempname)
 			print temp
 			temppass=data['password']
+			tempmac=data['mac_address']
 			if temppass==temp.password:
-				return HttpResponse("True")
+				if str(tempmac)==temp.mac_id:
+					ip=get_client_ip(request)
+					temp.ip_address=ip
+					temp.save()
+					return HttpResponse("You can login")
+				else:
+					print tempmac
+					print temp.mac_id
+					return HttpResponse('this email is not of this device')
 			else:
-				return HttpResponse("False")
+				return HttpResponse("wrong username or password")
 		else:
 			return HttpResponse("user is not registered")
 	else:
