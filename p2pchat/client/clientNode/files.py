@@ -14,6 +14,7 @@ class RegistrationForm(forms.Form):
     def __init__(self,*args,**kwargs):
         super(RegistrationForm,self).__init__(*args, **kwargs)
         self.fields['email'].widget.attrs['onblur'] = "checkValidEmail();"
+        self.fields['password2'].widget.attrs['onblur']="matchpassword();"
 
     name = forms.RegexField(regex=r'^\w+$', widget=forms.TextInput(attrs=dict(required=True, max_length=30)), label=_("Name"), error_messages={ 'invalid': _("This value must contain only letters, numbers and underscores.") })
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(required=True, max_length=30)), label=_("Email address"))

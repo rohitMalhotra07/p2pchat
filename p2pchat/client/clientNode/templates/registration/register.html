@@ -15,7 +15,8 @@
     <script type="text/javascript">
     function checkValidEmail() 
         {
-            var email = document.getElementById("id_email").value;
+            var domelementemail=document.getElementById("id_email");
+            var email = domelementemail.value;
             //alert(email);
             document.getElementById("check").innerHTML = email;
             $.ajax({
@@ -26,12 +27,32 @@
                             Email: email,
                          },
                     success: function(data) {
-                                                alert("Congratulations! You scored: "+data);
+                                                if(data=="False")
+                                                {
+                                                    alert("Email is already registered ");
+                                                    domelementemail.value="";
+                                                }
                                             },
                     error: function(xhr, textStatus, errorThrown){
                                                                     alert("Please report this error: "+errorThrown+xhr.status+xhr.responseText);
                                                                 }
                     });
         }
+    function matchpassword()
+    {
+        var pass1=document.getElementById("id_password1").value;
+        var domelementpass2=document.getElementById("id_password2");
+        var pass2=domelementpass2.value;
+        if (pass1!="" && pass2!="")
+        {
+            if(pass1!=pass2)
+            {
+                alert("password doesn't match");
+                domelementpass2.value="";
+            }
+
+        }
+
+    }
     </script>
 {% endblock %}
