@@ -52,7 +52,11 @@ ROOT_URLCONF = 'server.urls'
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
+ViewsPath=os.path.join(BASE_DIR,'supernode')
 
+AUTHENTICATION_BACKENDS = ( 'supernode.views.MyCustomBackend', )
+
+CUSTOM_USER_MODEL = 'supernode.UserData'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 

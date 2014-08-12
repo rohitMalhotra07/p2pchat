@@ -12,25 +12,84 @@
     </form>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
 
-    <script type="text/javascript">
-    function checkValidEmail() 
+   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+   <script>
+    jQuery(document).ajaxSend(function(event, xhr, settings) {
+
+
+    function getCookie(name) {
+        console.log("Get Cookie Called");
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function sameOrigin(url) {
+        console.log("Same origin");
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host; // host + port
+        var protocol = document.location.protocol;
+        var sr_origin = '//' + host;
+        var origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+        console.log("Main method");
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+});
+
+</script>
+
+
+<script type="text/javascript">
+
+    function checkValidUsername() 
         {
-            var domelementemail=document.getElementById("id_email");
-            var email = domelementemail.value;
+            var domelementusername=document.getElementById("id_username");
+            var username = domelementusername.value;
             //alert(email);
-            document.getElementById("check").innerHTML = email;
+            document.getElementById("check").innerHTML = username;
             $.ajax({
                     type: "POST",
-                    url:"http://localhost:8000/checkvalidemail",  // or just url: "/my-url/path/"
+                    url:"http://127.0.0.1:8000/checkvalidusername",  // or just url: "/my-url/path/"
                     data:{
-                            csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
-                            Email: email,
+                            //csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                            Username: username,
                          },
+
+                    xhrFields:{
+                        withCredentials: true
+                    },
+                    crossDomain: true,
+                    dataType:"json",
                     success: function(data) {
-                                                if(data=="False")
+                                                response=$.parseJSON(data)
+                                                //alert(response.value);
+                                                if(response.value=="False")
                                                 {
-                                                    alert("Email is already registered ");
-                                                    domelementemail.value="";
+                                                    alert("username is already registered ");
+                                                    domelementusername.value="";
                                                 }
                                             },
                     error: function(xhr, textStatus, errorThrown){
