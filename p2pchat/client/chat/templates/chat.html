@@ -1,0 +1,174 @@
+<html>
+<head>
+
+{% load static %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+<script src="http://localhost:4000/socket.io/socket.io.js"></script>
+
+<script>
+    $(document).ready(function(){
+      var socket = io.connect('localhost', {port: 4000});
+      
+      socket.on('connect', function(){
+        console.log("connected to node server");
+      });
+      
+      var entry_el = $('#comment');
+      
+        // listener, whenever the server emits 'updatechat', this updates the chat body
+        socket.on('updatechat', function (username, data) {
+                //var user_div=$(username);
+                $('#'+username).append('<b>'+username + ':</b> ' + data + '<br>');
+            });
+        socket.on('onlineOfflineinfo',function(message){
+            mess=$.parseJSON(message)
+            //alert(mess['username']);
+            var username =mess['username']
+            var value=mess['value']
+            if(value=='online'){ // call function to add user
+                add_online_user(username);
+            }
+            else{
+                // call function to remove user
+                remove_online_user(username);
+            }
+            function remove_online_user(username)
+            {
+                $("#onlinelist"+username).remove();
+            }
+
+            function add_online_user(username)
+            {
+                user_id=username;
+                $("#onlineusers").append('<li><a href="#" onclick="chatuser(\'' + user_id + '\')" id="onlinelist'+user_id+'"> '+ user_id +  '</a></li>'); 
+            }
+            
+        });
+
+      /*socket.on('message', function(message) {
+        //Escape HTML characters
+        var data = message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        
+        //Append message to the bottom of the list
+        $('#comments').append('<li>' + data + '</li>');
+        window.scrollBy(0, 10000000000);
+        entry_el.focus();
+      });*/
+                     
+      entry_el.keypress(function(event){
+        //When enter is pressed send input value to node server
+        if(event.keyCode != 13) return;
+        var msg = entry_el.attr('value');
+        if(msg){
+           socket.emit('send_message', msg, function(data){
+                console.log(data);
+           });
+        
+        //Clear input value   
+        entry_el.attr('value', '');
+       }
+      });
+    });
+  </script>
+
+
+<script type="text/javascript">
+var new_user_header='';
+var user_chat='';
+function chatuser(value)
+{
+    new_user_header=$("#chat_receiver");
+    new_user_header.html(value);
+    
+    //now write a code to load previous chat for this user
+
+    
+}
+
+function add_chat()
+{
+    $.getJSON(file, function(data) {
+    
+        var output="";
+        for (var i in data.chat) {
+            output+="<div class = 'name'>"+data.chat[i].from + "</div><div class = 'message'>"+data.chat[i].message + "</div><br>";
+        }
+
+        output+="</ul>";
+        document.getElementById("past_chat").innerHTML=output;
+          });
+}
+
+</script>
+  
+
+<link rel="stylesheet" type="text/css" href="static/style.css">
+
+
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+
+    <script>
+    $.ajax({
+                    type: "GET",
+                    url:"http://127.0.0.1:8000/recieveonlinelist",  // or just url: "/my-url/path/"
+                    data:{'username':"nothing"},
+                    dataType:"json",
+                    xhrFields:{
+                        withCredentials: true
+                    },
+                    crossDomain: true,
+                    success: function(data) {
+                                                //response=$.parseJSON(data)
+                                               // alert(data['onlinelist'][0]['username']);
+
+                                                var output="<ul>";
+                                                for (var item in data['onlinelist']) {
+                                                    var user_id=data['onlinelist'][item].username;
+                                                    console.log(user_id);
+                                                    //console.log(user_id);
+                                                    output+='<li><a href="#" onclick="chatuser(\'' + user_id + '\')" id="onlinelist'+user_id+'"> '+ user_id +  '</a></li>';
+                                                    }
+
+                                                output+="</ul>";
+                                                document.getElementById("onlineusers").innerHTML=output;
+                                            },
+                    error: function(xhr, textStatus, errorThrown){
+                                                                    alert("Please report this error: "+errorThrown+xhr.status);
+                                                                }
+                    });
+  
+    </script>
+
+</head>
+
+<div id="container">
+    <div id="menu">
+        <strong style="margin-top:20px; margin-left:50px; line-height: 20px; color:#fff; font-size:25px">HT Connect</strong>
+        <div class="menu_item"><a href="">Manage Groups</a></div>
+        <div class="menu_item"><a href="">Company Messages</a></div>
+        <div class="menu_item"><a href="">Chat Messages</a></div>
+        <div class="menu_item"><a href="">Find Friends</a></div>
+        
+    </div>
+
+
+        <div id="chatbox"> 
+            <div id="chat_receiver"></div>
+    
+            <div id="past_chat"></div>
+    
+                <form><br><br>
+                    <input type="text" style="width:90%; margin-left:5%; margin-top:10px; height:50px;" id="chat_message"><br><br>
+                    <input type="submit" value = "SEND MESSAGE" style="margin-left:5%" onclick="add_chat()">
+                </form>
+    
+        </div>
+        <div id="onlineusers">
+    
+            
+    
+    
+        </div>
+    </div>
+    
+    </html>
