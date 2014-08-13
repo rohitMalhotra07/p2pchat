@@ -1,0 +1,158 @@
+<html>
+<head>
+{% load static %}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+
+<script type="text/javascript">
+function chatuser(num)
+{
+	var i = num;
+	var name1 = "rohit malhotra";
+	name1 = name1.replace(/\s/g,'');
+	var name2 = document.getElementById(i).innerHTML.toLowerCase();
+	name2 = name2.replace(/\s/g,'');
+	file = name1+"_"+name2+".json";
+	file = "static/json/"+file;
+    //alert(file);
+    file2="static/json/rohitmalhotra_ronakmundra.json"
+	 $.getJSON(file2, function(data) {
+
+       // alert(data);
+
+        var output="";
+        for (var i in data.chat) {
+            output+="<div class = 'name'>"+data.chat[i].from + "</div><div class = 'message'>"+data.chat[i].message + "</div><br>";
+        }
+
+        output+="</ul>";
+        document.getElementById("past_chat").innerHTML=output;
+  		});
+
+
+
+	//var receive = receiver.toUpperCase();
+	var receive = document.getElementById(i).innerHTML.toUpperCase();
+	document.getElementById('chat_receiver').innerHTML = receive;
+}
+
+function add_chat()
+{
+
+	
+	var name1 = "rohit malhotra";
+	name1 = name1.replace(/\s/g,'');
+	var name2 = document.getElementById('chat_receiver').innerHTML.toLowerCase();
+	name2 = name2.replace(/\s/g,'');
+	file = name1+"_"+name2+".json";
+	file = "static/json/"+file;
+
+	alert (file);
+
+	$.getJSON(file, function(data) {
+
+        var output="";
+        Message=document.getElementById('chat_message').value
+        data['chat'].push({
+        	to:"rohit malhotra",
+        	from:"ronak mundra",
+        	time:"12:05",
+        	message:Message
+        	});
+        for (var i in data.chat) {
+            output+="<div class = 'name'>"+data.chat[i].from + "</div><div class = 'message'>"+data.chat[i].message + "</div><br>";
+        }
+        //Message=document.getElementById('chat_message').value
+        //output+="<div class = 'name'>"+data.chat[i].from + "</div><div class = 'message'>"+Message + "</div><br>"
+        output+="</ul>";
+        document.getElementById('chat_message').value=""
+        document.getElementById("past_chat").innerHTML=output;
+        data={
+                            csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                            to:'rohit malhotra',
+                            from:'ronak mundra',
+                            time:'12:05',
+                            message: Message,
+             };
+
+        $.ajax({
+                    url:"http://localhost:8000/addchat",  // or just url: "/my-url/path/"
+                    type: "POST",
+                    dataType : 'json',
+                    data:{json: JSON.stringify(data)
+                           },
+
+
+                    success: function(data) {
+                                                alert("data")
+                                                if(data=="False")
+                                                {
+                                                    alert("data saved");
+                                                }
+                                            },
+                    error: function(xhr, textStatus, errorThrown){
+                                                                    alert(errorThrown)
+                                                                    alert("Please report this error: "+errorThrown+xhr.status+xhr.responseText);
+                                                                }
+                    });
+  		});
+
+
+
+
+}
+</script>
+
+
+<link rel="stylesheet" type="text/css" href={% static "style.css" %}>
+
+
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script>
+  $.getJSON('{% static "json/online.json" %}', function(data) {
+        var output="<ul>";
+        for (var i in data.users) {
+            output+="<li><a href='#' onclick='chatuser("+i+")' id='"+i+"'>" + data.users[i].name + "</a></li>";
+        }
+
+        output+="</ul>";
+        document.getElementById("onlineusers").innerHTML=output;
+  });
+    </script>
+
+
+
+
+</head>
+<div id="container">
+	<div id="menu">
+		<strong style="margin-top:20px; margin-left:50px; line-height: 20px; color:#fff; font-size:25px">HT Connect</strong>
+		<div class="menu_item"><a href="">Manage Groups</a></div>
+		<div class="menu_item"><a href="">Company Messages</a></div>
+		<div class="menu_item"><a href="">Chat Messages</a></div>
+		<div class="menu_item"><a href="">Find Friends</a></div>
+		
+	</div>
+
+
+		<div id="chatbox"> 
+			<div id="chat_receiver"></div>
+	
+			<div id="past_chat"></div>
+	
+				<form>
+                    {% csrf_token %}
+					<br><br>
+					<input type="text" style="width:90%; margin-left:5%; margin-top:10px; height:50px;" id="chat_message"><br><br>
+					<input type="submit" value = "SEND MESSAGE" style="margin-left:5%" onclick="add_chat()">
+				</form>
+	
+		</div>
+		<div id="onlineusers">
+	
+			
+	
+	
+		</div>
+	</div>
+	
+	</html>"
