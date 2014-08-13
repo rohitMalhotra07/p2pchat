@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     url(r'^checkvalidusername','supernode.views.checkvalidusername'),
     url(r'^logincheck','supernode.views.logincheck'),
     url(r'^logout','supernode.views.logoutServer'),
-    url(r'^clientToServerPolling','supernode.views.clientToServerPolling'),
     url(r'^recieveonlinelist','supernode.views.recieveonlinelist'),
     url(r'^connectedcheck','supernode.views.connectedcheck'),
+    url(r'^friendship/',include('friendship.urls')),
 )

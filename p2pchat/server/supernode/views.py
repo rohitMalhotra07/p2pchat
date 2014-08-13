@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate, login
 import threading
 import datetime
 import time
-import bisect    # for implementing binary search in user_last_scene
+import bisect    # for implementing binary search in user_last_seen
 import collections   # for ordered dictionary
 from supernode.models import UserData
 from supernode.models import user_last_seen , user_last_seen_invert
@@ -26,35 +26,40 @@ class OnlineStatusUpdate(threading.Thread):   #thread to update the user_connect
 	def run(self):
 		while 1:
 			global user_last_seen
-			index = bisect.bisect(tuple(x[0] for x in user_last_scene.values()),datetime.datetime.now()-datetime.timedelta(seconds=50))  #calculates the index of last user who is online. Every user after him is onlne and before him is offline.
-			for i in range(index):
-				obj = UserData.objects.get(username = user_last_scene.keys()[i])
-				obj.onlineinfo = 'False'
-				obj.save()
-			for i in range(len(user_last_scene)-index):
-				obj = UserData.objects.get(username = user_last_scene.keys()[index+i])
-				obj.onlineinfo = 'True'
-				obj.save()
+			print "in online status update thread"
+			index = bisect.bisect_right(tuple(x[0] for x in user_last_seen.values()),datetime.datetime.now()-datetime.timedelta(seconds=50))  #calculates the index of last user who is online. Every user after him is onlne and before him is offline.
+			for i in range(index-1):
+				obj = UserData.objects.get(username = user_last_seen.keys()[i])
+				if obj.onlineinfo !=False:
+					obj.onlineinfo =False
+					obj.save()
+			for i in range(len(user_last_seen)-index+1):
+				obj = UserData.objects.get(username = user_last_seen.keys()[index+i])
+				if obj.onlineinfo!=True:
+					obj.onlineinfo =True
+					obj.save()
 			time.sleep(100)
 
 online_status_update = OnlineStatusUpdate()
 
 def connectedcheck(request):
 	print "in connected check"
-	global user_last_scene
-	global user_last_scene_invert
+	global user_last_seen
+	global user_last_seen_invert
 	data=json.loads(request.body)
 	print data['messagetime']
 	if data.has_key('messagetime'):
 		print "in if of connected check"
 		ip = get_client_ip(request)   # get the ip address of the client
-		print user_last_scene_invert 
-		username = user_last_scene_invert[ip]   #get the email id corresponding to that ip address
+		print user_last_seen_invert 
+		username = user_last_seen_invert[ip]   #get the email id corresponding to that ip address
 		print username
-		del user_last_scene[username]
-		user_last_scene[username] = (data['messagetime'],ip)   # update the last seen time of the user in the user_last_scene dict
+		del user_last_seen[username]
+		print user_last_seen
+		user_last_seen[username] = (datetime.datetime.strptime(data['messagetime'],"%Y-%m-%d %H:%M:%S.%f"),ip)   # update the last seen time of the user in the user_last_seen dict
+		return HttpResponse("reached")
 	else:
-		pass
+		return HttpResponse("not reached")
 
 class MyCustomBackend:
 	def authenticate(self, username=None, password=None,tempmac=None):
@@ -93,7 +98,7 @@ def user_registration(request):
 	print data['username']
 	print data['password']
 	u=UserData.objects.create(username=data['username'],email=data['email'],password=data['password'],mac_id=data['mac_address'],ip_address=ip_address,roll_no= data['roll_no'],college_name=data['college_name'],onlineinfo=False)
-	u.add_to_online_list()
+	#u.add_to_online_list()
 	print "done1"
 	#tempuserdata=UserData.objects.create(mac_id=data['mac_address'],ip_address=ip_address,roll_no= ['roll_no'],college_name=data['college_name'],onlineinfo=0)
 	print 'done2'
@@ -149,14 +154,19 @@ def logincheck(request):
 	password = data['password']
 	mac_address=data['mac_address']
 	user = authenticate(username=username, password=password,tempmac=mac_address)
+	print ">>>>"
 	print user
+	print "<<<<"
 	if user is not None:
 		if user.is_active:
 			login(request, user)
-			print user.is_active
+			#print user.is_active
 			user.onlineinfo=True
+			print "in login check before user save"
 			user.save()
-			print user.onlineinfo
+			print "in login check after user save"
+			user.add_to_online_list()
+			#print user.onlineinfo
 			#tempdata=getonlinelist()
 			tempdata={'value':'logged in'}
 			return HttpResponse(json.dumps(tempdata))
@@ -187,12 +197,12 @@ def logoutServer(request):
 	print "in logout"
 	data=json.loads(request.body)
 	username=data['username']
-	print username
+	#print username
 	u=UserData.objects.get(username=username)
 	u.onlineinfo=False
 	u.is_active=False
 	u.save()
-	print u
+	#print u
 	#logout(username)
 	return HttpResponse("done logging out")
 """

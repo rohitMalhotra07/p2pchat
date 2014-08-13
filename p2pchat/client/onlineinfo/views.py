@@ -12,23 +12,27 @@ import time
 import redis
 
 ServerAddress="http://127.0.0.1:8010"
-
 class IsOnline(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
+        self.signal=True
 
     def run(self):
-    	runthread()
+    	while self.signal==True:
+    		runthread()
+    def stop(self):
+    	self.signal=False
 
 def runthread():
 	global ServerAddress
-	while 1:
-		currenttime=str(datetime.datetime.now())
-		checkmessage = {'messagetime':currenttime}
-		print checkmessage
-		r = requests.get(ServerAddress+'/connectedcheck',data=json.dumps(checkmessage))#can use get() if we want some response from server
-		time.sleep(50)
+	currenttime=str(datetime.datetime.now())
+	checkmessage = {'messagetime':currenttime}
+	print checkmessage
+	r = requests.get(ServerAddress+'/connectedcheck',data=json.dumps(checkmessage))#can use get() if we want some response from server
+	#print (r.text)
+	time.sleep(50)
 
+poll=IsOnline()
 
 @csrf_exempt
 def recieve_offline_info(request):
@@ -44,8 +48,9 @@ def recieve_offline_info(request):
         message=json.dumps(data)
         r.publish('onlineOfflineinfo',message)        
         return HttpResponse("Everything worked :)")
-    except Exception, e:
-        return HttpResponseServerError(str(e))
+    except:
+    	print "in Exception"
+        return HttpResponse()
 
 def recieve_online_info(request):
 	try:
@@ -57,8 +62,9 @@ def recieve_online_info(request):
 		message=json.dumps(data)
 		r.publish('onlineOfflineinfo',message)        
 		return HttpResponse("Everything worked :)")
-	except Exception, e:
-		return HttpResponseServerError(str(e))
+	except :
+		print "in Exception"
+		return HttpResponse("not worked")
 
 def recieve_list(request):
 	print("entered recieve list")
@@ -67,7 +73,7 @@ def recieve_list(request):
 	r = requests.get(url) #give username with this request to ensure useris logged in.
 	data_received=json.loads(r.text)
 	getonlinelist(data_received)
-	poll=IsOnline()
+	global poll
 	poll.start()
 	return HttpResponse(json.dumps(data_received))
 

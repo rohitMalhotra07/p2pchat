@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from clientNode.models import *
 import threading
 import time
+from onlineinfo.views import poll
 
 ServerAddress="http://127.0.0.1:8010"
 """
@@ -140,6 +141,7 @@ def register_success(request):
  
 def logout_page(request):
     global ServerAddress
+    global poll
     #global exitPolling
     logout(request)
     url=ServerAddress+'/logout'
@@ -148,6 +150,7 @@ def logout_page(request):
     r=requests.get(url,data=json.dumps(data))
     #return HttpResponse(r.text)
     #exitPolling=0
+    poll.stop()
     return HttpResponseRedirect('/')
 
 #@login_required(login_url='/')
